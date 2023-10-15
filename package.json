@@ -1,0 +1,35 @@
+{
+  "name": "danime-extension",
+  "version": "0.0.1",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  "scripts": {
+    "dev": "NODE_OPTIONS='--openssl-legacy-provider' webextension-toolbox dev",
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' webextension-toolbox build"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.22.15",
+    "@types/react": "^16.9.38",
+    "@types/react-dom": "^16.9.8",
+    "@typescript-eslint/eslint-plugin": "^3.3.0",
+    "@typescript-eslint/parser": "^3.3.0",
+    "eslint": "^7.2.0",
+    "eslint-config-webextension": "^0.6.1",
+    "prettier": "^3.0.3",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "typescript": "^5.2.2",
+    "@webextension-toolbox/webextension-toolbox": "^6.1.0",
+    "webpack-merge": "^4.2.2"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.13",
+    "@mui/material": "^5.14.13",
+    "@types/react": "18.2.24",
+    "@types/react-dom": "18.2.9",
+    "axios": "^1.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
