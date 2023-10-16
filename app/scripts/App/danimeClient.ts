@@ -8,6 +8,7 @@ export interface Anime {
   updated_at: Date;
   episodes: Episode[];
   allWatched: boolean;
+  unWatchedCount: number;
 }
 
 export interface Episode {
@@ -76,6 +77,7 @@ const getAnimeData = async (id: string): Promise<Anime> => {
     updated_at: latestEpisodeCreatedAt,
     episodes: episodeList,
     allWatched: episodeList.every((episode) => episode.watched),
+    unWatchedCount: episodeList.filter((episode) => !episode.watched).length,
   };
 };
 
