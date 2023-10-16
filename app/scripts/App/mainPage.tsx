@@ -1,23 +1,41 @@
 // material-uiのテーブルを使って、データを表示するReactコンポーネントを作成する
 // useEffectで、画面読み込み時にgetAnimeData()を使って、データを取得する
 
-import styled from "@emotion/styled";
 import React, { useEffect, useState } from "react";
 import { getAnimeData, Episode, Anime } from "./danimeClient";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Collapse, Box, Button, Container } from "@mui/material";
 
+import { tableCellClasses } from "@mui/material/TableCell";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 
-const StyledApp = styled.div`
-  // Your style here
-`;
+import { styled } from "@mui/material/styles";
 const BASE_URL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=";
 
 //Reactコンポーネントの型定義
 export interface AnimeTableProps {
   items: Anime[];
 }
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  "&:last-child td, &:last-child th": {
+    border: 0,
+  },
+}));
 
 // 指定したDate型から現在までの日数を計算する。ただし、１日未満の場合は時間を返す
 const calcDays = (date: Date) => {
@@ -37,59 +55,58 @@ function Row(props: { row: Anime }) {
 
   return (
     <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
+      <StyledTableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+        <StyledTableCell>
           <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
           </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
+        </StyledTableCell>
+        <StyledTableCell component="th" scope="row">
           {row.title}
-        </TableCell>
-        <TableCell>{row.allWatched ? "すべて視聴済み" : "未視聴あり"}</TableCell>
-        <TableCell>{calcDays(row.updated_at)}</TableCell>
-        <TableCell>{row.seasonTag}</TableCell>
-        <TableCell>
-          {" "}
-          <Button variant="outlined" href={`${BASE_URL}${row.id}`} target="_blank">
+        </StyledTableCell>
+        <StyledTableCell>{row.allWatched ? "すべて視聴済み" : `未視聴あり (${row.unWatchedCount}本)`}</StyledTableCell>
+        <StyledTableCell>{calcDays(row.updated_at)}</StyledTableCell>
+        <StyledTableCell>{row.seasonTag}</StyledTableCell>
+        <StyledTableCell>
+          <Button variant="contained" href={`${BASE_URL}${row.id}`} target="_blank">
             視聴
           </Button>
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        </StyledTableCell>
+      </StyledTableRow>
+      <StyledTableRow>
+        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Table size="small" aria-label="episodes">
                 <TableHead>
                   <TableRow>
-                    <TableCell>話数</TableCell>
-                    <TableCell>タイトル</TableCell>
-                    <TableCell>リンク</TableCell>
-                    <TableCell>視聴ステータス</TableCell>
-                    <TableCell>最終更新</TableCell>
+                    <StyledTableCell width={40}>話数</StyledTableCell>
+                    <StyledTableCell>タイトル</StyledTableCell>
+                    <StyledTableCell>視聴ステータス</StyledTableCell>
+                    <StyledTableCell>最終更新</StyledTableCell>
+                    <StyledTableCell width={60}>リンク</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {row.episodes.map((episode) => (
                     <TableRow key={episode.id}>
-                      <TableCell>{episode.episodeNumber}</TableCell>
-                      <TableCell>{episode.title}</TableCell>
-                      <TableCell component="th" scope="row">
-                        <Button variant="outlined" href={episode.url} target="_blank">
+                      <StyledTableCell>{episode.episodeNumber}</StyledTableCell>
+                      <StyledTableCell>{episode.title}</StyledTableCell>
+                      <StyledTableCell>{episode.watched ? "視聴済み" : "未視聴"}</StyledTableCell>
+                      <StyledTableCell>{calcDays(episode.created_at)}</StyledTableCell>
+                      <StyledTableCell component="th" scope="row">
+                        <Button variant="contained" href={episode.url} target="_blank">
                           視聴
                         </Button>
-                      </TableCell>
-                      <TableCell>{episode.watched ? "視聴済み" : "未視聴"}</TableCell>
-                      <TableCell>{calcDays(episode.created_at)}</TableCell>
+                      </StyledTableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </Box>
           </Collapse>
-        </TableCell>
-      </TableRow>
+        </StyledTableCell>
+      </StyledTableRow>
     </React.Fragment>
   );
 }
@@ -101,14 +118,14 @@ export const AnimeTable = (props: AnimeTableProps) => {
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table" size="small">
         <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell>作品名</TableCell>
-            <TableCell>視聴ステータス</TableCell>
-            <TableCell>最終更新</TableCell>
-            <TableCell>放送時期</TableCell>
-            <TableCell>リンク</TableCell>
-          </TableRow>
+          <StyledTableRow>
+            <StyledTableCell width={30} />
+            <StyledTableCell>作品名</StyledTableCell>
+            <StyledTableCell>視聴ステータス</StyledTableCell>
+            <StyledTableCell>最終更新</StyledTableCell>
+            <StyledTableCell>放送時期</StyledTableCell>
+            <StyledTableCell>リンク</StyledTableCell>
+          </StyledTableRow>
         </TableHead>
         <TableBody>
           {items.map((row) => (
@@ -123,7 +140,6 @@ export const AnimeTable = (props: AnimeTableProps) => {
 // Reactコンポーネント
 export const MainPage = () => {
   const [animeList, setAnimeList] = useState<Anime[]>([]);
-  console.log(animeList);
 
   const animeIdList = ["26609", "26467", "26440"];
 
@@ -132,11 +148,9 @@ export const MainPage = () => {
     Promise.all(promises).then(setAnimeList);
   }, []);
   return (
-    <StyledApp>
-      <Container maxWidth="lg">
-        <AnimeTable items={animeList} />
-      </Container>
-    </StyledApp>
+    <Container>
+      <AnimeTable items={animeList} />
+    </Container>
   );
 };
 
