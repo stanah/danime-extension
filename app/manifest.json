@@ -20,9 +20,6 @@
     "default_title": "__MSG_browserActionTitle__",
     "default_popup": "pages/popup.html"
   },
-  "chrome_url_overrides": {
-    "newtab": "pages/newtab.html"
-  },
   "content_scripts": [
     {
       "matches": ["https://animestore.docomo.ne.jp/animestore/**"],
