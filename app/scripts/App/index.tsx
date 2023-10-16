@@ -1,17 +1,21 @@
-import React from "react";
-import styled from "@emotion/styled";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 import MainPage from "./mainPage";
 
-const StyledApp = styled.div`
-  // Your style here
-`;
+const theme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+  typography: {
+    fontSize: 22,
+  },
+});
 
 export function App() {
   return (
-    <StyledApp>
+    <ThemeProvider theme={theme}>
       <MainPage />
-    </StyledApp>
+    </ThemeProvider>
   );
 }
 
