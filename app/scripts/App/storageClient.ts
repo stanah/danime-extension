@@ -1,6 +1,3 @@
-// アニメのデータを保存するクラス
-// データの保存はbrowser.storage.syncを使う
-
 import { getAnimeData, Anime, AnimeId } from "./danimeClient";
 
 export type Rate = 1 | 2 | 3 | 4 | 5;
@@ -8,22 +5,14 @@ export type Rate = 1 | 2 | 3 | 4 | 5;
 export interface AnimeWithRate extends Anime {
   rate: Rate | null;
 }
-// 予約済みのキー
+
 const reservedKeys = ["watchLists"];
 const animeIdPrefix = "animeId_";
 const defaultWatchListName = "default";
 
-const getAnime = (id: AnimeId): Promise<AnimeWithRate> => {
-  return get(`${animeIdPrefix}${id}}`);
-};
-const setAnime = (id: AnimeId, value: any): Promise<void> => {
-  return set(`${animeIdPrefix}${id}}`, value);
-};
-
 const remove = async (key: string): Promise<void> => {
   if (typeof browser !== "undefined") {
-    throw new Error("browser");
-    //   return browser.storage.sync;
+    return browser.storage.sync.remove(key);
   } else if (typeof chrome !== "undefined") {
     await chrome.storage.sync.remove(key);
   } else {
@@ -33,8 +22,7 @@ const remove = async (key: string): Promise<void> => {
 
 const get = async (key: string): Promise<any> => {
   if (typeof browser !== "undefined") {
-    throw new Error("browser");
-    //   return browser.storage.sync;
+    return browser.storage.sync.get(key);
   } else if (typeof chrome !== "undefined") {
     return new Promise((resolve, reject) => {
       chrome.storage.sync.get(key, function (value) {
@@ -48,8 +36,7 @@ const get = async (key: string): Promise<any> => {
 
 const set = async (key: string, value: any): Promise<void> => {
   if (typeof browser !== "undefined") {
-    throw new Error("browser");
-    //   return browser.storage.sync;
+    return browser.storage.sync.set({ [key]: value });
   } else if (typeof chrome !== "undefined") {
     await chrome.storage.sync.set({ [key]: value });
   } else {
@@ -57,24 +44,31 @@ const set = async (key: string, value: any): Promise<void> => {
   }
 };
 
-export const addToWatchList = async (id: AnimeId) => {
+const getAnime = async (animeId: AnimeId): Promise<AnimeWithRate> => {
+  return get(`${animeIdPrefix}${animeId}}`);
+};
+
+const setAnime = async (animeId: AnimeId, value: AnimeWithRate): Promise<void> => {
+  return set(`${animeIdPrefix}${animeId}}`, value);
+};
+
+export const addToWatchList = async (animeId: AnimeId): Promise<void> => {
   const watchList = await getWatchList(defaultWatchListName);
-  await watchList.add(id);
+  await watchList.add(animeId);
   await watchList.save();
 };
 
-export const saveWatchList = async (watchList: WatchList) => {
+export const saveWatchList = async (watchList: WatchList): Promise<void> => {
   await set(watchList.name, watchList.list);
 
-  // プレイリストのリストに追加する
   const watchLists = (await get("watchLists")) || [];
   watchLists.push(watchList.name);
   await set("watchLists", watchLists);
 };
 
-export const removeWatchList = async (watchList: WatchList) => {
+export const removeWatchList = async (watchList: WatchList): Promise<void> => {
   await remove(watchList.name);
-  // プレイリストのリストから削除する
+
   const watchLists = (await get("watchLists")) || [];
   const newWatchLists = watchLists.filter((name: string) => name !== watchList.name);
   await set("watchLists", newWatchLists);
@@ -82,7 +76,7 @@ export const removeWatchList = async (watchList: WatchList) => {
 
 export const getWatchList = async (name: string): Promise<WatchList> => {
   const list = (await get(name)) || [];
-  const watchList = new WatchList(name, list); // list変数をstring[]型に変換する
+  const watchList = new WatchList(name, list);
   return watchList;
 };
 
@@ -96,45 +90,38 @@ export class WatchList {
   list: AnimeId[] = [];
 
   constructor(name: string, list: AnimeId[]) {
-    // nameが予約済みのキーと重複していたらエラーを投げる
     if (reservedKeys.includes(name)) throw new Error("Reserved key");
     this.name = name;
     this.list = list;
   }
 
-  async add(animeId: AnimeId) {
+  async add(animeId: AnimeId): Promise<void> {
     this.list.push(animeId);
   }
 
-  async remove(animeId: AnimeId) {
+  async remove(animeId: AnimeId): Promise<void> {
     this.list = this.list.filter((id) => id !== animeId);
   }
 
-  async getList() {
+  async getList(): Promise<AnimeId[]> {
     return this.list;
   }
 
-  async save() {
+  async save(): Promise<void> {
     await set(this.name, this.list);
   }
 }
 
 export class AnimeStorageClient {
-  constructor() {}
-
   async getAnimeInfo(id: AnimeId): Promise<AnimeWithRate> {
     const ret = await getAnime(id);
-    // 見つからない場合はdanimeClientから取得する
     if (ret === undefined) {
       console.log("見つからないのでdanimeClientから取得する");
       const data = await getAnimeData(id);
-      // dataをAnimeWithRate型に変換して保存する
       const animeWithRate: AnimeWithRate = {
         ...data,
         rate: null,
       };
-
-      // 被らないようにidにprefixをつけてstorageに保存する
       await setAnime(id, animeWithRate);
       return animeWithRate;
     }
@@ -142,26 +129,20 @@ export class AnimeStorageClient {
     return ret;
   }
 
-  async setRate(id: AnimeId, rate: Rate) {
+  async setRate(id: AnimeId, rate: Rate): Promise<void> {
     const animeInfo = await this.getAnimeInfo(id);
-    // rateを更新する
     animeInfo.rate = rate;
-    // storageに保存する
     await setAnime(id, animeInfo);
   }
 
-  async removeRate(id: AnimeId) {
+  async removeRate(id: AnimeId): Promise<void> {
     const animeInfo = await this.getAnimeInfo(id);
-    // rateを削除する
     animeInfo.rate = null;
-    // storageに保存する
     await setAnime(id, animeInfo);
   }
 
-  // getAnimeDataを使って取得したデータをstorageに保存する
-  async updateAnimeInfo(id: AnimeId) {
+  async updateAnimeInfo(id: AnimeId): Promise<void> {
     const data = await getAnimeData(id);
-    // dataをAnimeWithRate型に変換して保存する
     const animeWithRate: AnimeWithRate = {
       ...data,
       rate: null,
