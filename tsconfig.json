@@ -21,7 +21,7 @@
     "strict": true,
     "jsxImportSource": "@emotion/react",
     "outDir": "./dist/out-tsc",
-    "types": ["node"]
+    "types": ["node", "@types/firefox-webext-browser", "@types/chrome"]
   },
   "compileOnSave": false,
   "exclude": [
