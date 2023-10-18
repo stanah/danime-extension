@@ -1,31 +1,45 @@
 import ReactDOM from "react-dom/client";
+import { EventEmitter } from "events";
 
 import App from "./App";
-import { addToWatchList } from "./App/storageClient";
+import { getWatchList, getSelectedWatchListName } from "./App/storageClient";
+
+const eventEmitter = new EventEmitter();
 
 const div = document.createElement("div");
 div.style.position = "absolute";
 div.style.top = "0";
 div.style.left = "0";
-div.style.zIndex = "9999";
+div.style.zIndex = "1100";
 document.body.append(div);
 
 const root = ReactDOM.createRoot(div);
 
-root.render(<App />);
+root.render(<App eventEmitter={eventEmitter} />);
 
-// wait for page load
 window.addEventListener("load", () => {
-  document.body.querySelectorAll("div.itemModule").forEach((d) => {
+  document.querySelectorAll("div.itemModule").forEach((d) => {
     const workId = d.getAttribute("data-workid");
     if (workId && Number(workId) > 0) {
-      const button = document.createElement("button");
-      button.textContent = "ウォッチリストに追加";
-      button.style.zIndex = "9999";
-      button.onclick = () => {
-        addToWatchList(Number(workId));
+      const buttonElement = document.createElement("button");
+      buttonElement.textContent = "ウォッチリストに追加";
+      buttonElement.style.zIndex = "9999";
+      buttonElement.onclick = async () => {
+        const selectedWatchList = await getSelectedWatchListName();
+        const watchList = await getWatchList(selectedWatchList);
+        await watchList.add(Number(workId));
+        eventEmitter.emit("watchListUpdated");
       };
-      d.appendChild(button);
+
+      const div = document.createElement("div");
+      div.appendChild(buttonElement);
+
+      // すでに追加されたボタンを削除する
+      const existingButton = d.querySelector("div > button");
+      if (existingButton) {
+        existingButton.remove();
+      }
+      d.appendChild(div);
     }
   });
 });

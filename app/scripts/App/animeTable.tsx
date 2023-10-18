@@ -41,8 +41,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 // 指定したDate型から現在までの日数を計算する。ただし、１日未満の場合は時間を返す
 const calcDays = (date: Date) => {
-  console.log(date);
-
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
