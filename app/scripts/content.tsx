@@ -27,8 +27,12 @@ window.addEventListener("load", () => {
       buttonElement.onclick = async () => {
         const selectedWatchList = await getSelectedWatchListName();
         const watchList = await getWatchList(selectedWatchList);
-        await watchList.add(Number(workId));
-        eventEmitter.emit("watchListUpdated");
+        try {
+          await watchList.add(Number(workId));
+          eventEmitter.emit("watchListUpdated", { error: false, notify: true, message: "ウォッチリストに追加しました" });
+        } catch (e) {
+          eventEmitter.emit("watchListUpdated", { error: true, notify: true, message: "既に登録されています" });
+        }
       };
 
       const div = document.createElement("div");
