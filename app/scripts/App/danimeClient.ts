@@ -44,11 +44,12 @@ const getAnimeData = async (id: AnimeId): Promise<Anime> => {
     if (match == null || match.length === 0) return;
     const imgSrc = element.querySelector("div.thumbnailContainer img")?.getAttribute("data-src") || "";
     const createdAt = imgSrc.slice(-13);
+    const partId = element.getAttribute("href")?.replace("cd_pc?partId=", "");
     episodeList.push({
       id: element.id,
       episodeNumber: extractNumberFromString(element.querySelector("div.textContainer span.line1 span.number")?.innerHTML ?? ""),
       title: element.querySelector("div.textContainer h3.line2 span")?.innerHTML ?? "",
-      url: `https://animestore.docomo.ne.jp/animestore/ci_pc?workId=${id}&${element.getAttribute("href")?.replace("cd_pc?", "")}`, // FIXME
+      url: `https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId=${partId}`,
       watched: element.classList.contains("watched"),
       created_at: new Date(Number(createdAt)).getTime(),
     });
