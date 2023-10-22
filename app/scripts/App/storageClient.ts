@@ -65,7 +65,8 @@ const remove = async (key: string): Promise<void> => {
 
 const get = async (key: string): Promise<any> => {
   if (typeof browser !== "undefined") {
-    return browser.storage.sync.get(key);
+    const ret = await browser.storage.sync.get(key);
+    return ret[key];
   } else if (typeof chrome !== "undefined") {
     return new Promise((resolve, reject) => {
       chrome.storage.sync.get(key, function (value) {
@@ -162,8 +163,7 @@ export class WatchList {
   async add(animeId: AnimeId): Promise<void> {
     // 重複している場合、alertを出す
     if (this.list.find((d) => d.id === animeId)) {
-      alert("既に登録されています");
-      return;
+      throw new Error("Already exists");
     }
 
     const ret = await animeStorageClient.getAnimeInfo(animeId);
