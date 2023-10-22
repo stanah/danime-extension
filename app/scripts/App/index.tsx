@@ -1,6 +1,20 @@
 import { EventEmitter } from "events";
 import { useEffect, useState } from "react";
-import { Container, Button, IconButton, Typography, Grid, Select, MenuItem, InputLabel, FormControl, Snackbar, Alert } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  Typography,
+  Grid,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Snackbar,
+  Alert,
+  Modal,
+  Box,
+  Backdrop,
+} from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import EditIcon from "@mui/icons-material/Edit";
@@ -49,11 +63,23 @@ export const App = ({ eventEmitter }: AppProps) => {
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState<"success" | "error">("success");
 
+  const [height, setHeight] = useState<number>(window.innerHeight);
+
   const updateAnimeData = async () => {
     if (!watchList) return;
     const newWatchList = await watchList.updateAll();
     setWatchList(newWatchList);
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setHeight(window.innerHeight);
+      console.log(window.innerHeight);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // 選択されているwaTchListを削除する
   const removeSelectedWatchList = async () => {
@@ -113,7 +139,7 @@ export const App = ({ eventEmitter }: AppProps) => {
   }, []);
 
   return (
-    <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, left: 0 }}>
+    <div>
       <ThemeProvider theme={theme}>
         <IconButton
           style={{ margin: "15px" }}
@@ -123,8 +149,8 @@ export const App = ({ eventEmitter }: AppProps) => {
         >
           <Menu />
         </IconButton>
-        {visible ? (
-          <Container maxWidth={false}>
+        <Modal open={visible} onClose={() => setVisible(false)} closeAfterTransition BackdropComponent={Backdrop} BackdropProps={{ invisible: true }}>
+          <Box sx={{ top: "50%", left: "50%" }}>
             <Grid
               container
               direction="row"
@@ -132,6 +158,9 @@ export const App = ({ eventEmitter }: AppProps) => {
               alignItems="center"
               style={{ backgroundColor: "#eb5528", opacity: "95%", zIndex: 0 }}
             >
+              <IconButton style={{ margin: "15px" }} onClick={() => setVisible(!visible)}>
+                <Menu />
+              </IconButton>
               <IconButton style={{ margin: "15px" }} onClick={updateAnimeData}>
                 <RefreshIcon />
               </IconButton>
@@ -168,6 +197,7 @@ export const App = ({ eventEmitter }: AppProps) => {
               )}
             </Grid>
             <AnimeTable
+              tableHeight={height - 200}
               items={items}
               editMode={editMode}
               onRemove={async (d) => {
@@ -176,8 +206,8 @@ export const App = ({ eventEmitter }: AppProps) => {
                 setItems(watchList.getList());
               }}
             />
-          </Container>
-        ) : null}
+          </Box>
+        </Modal>
         <Snackbar open={open} autoHideDuration={4000} onClose={() => setOpen(false)}>
           <Alert severity={severity} sx={{ width: "100%" }}>
             {message}
