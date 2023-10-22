@@ -26,6 +26,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.13",
     "@mui/material": "^5.14.13",
+    "@mui/x-data-grid": "^6.16.3",
     "@types/chrome": "^0.0.247",
     "@types/firefox-webext-browser": "^111.0.2",
     "@types/react": "18.2.24",
