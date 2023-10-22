@@ -1,11 +1,11 @@
 // material-uiのテーブルを使って、データを表示するReactコンポーネントを作成する
 // useEffectで、画面読み込み時にgetAnimeData()を使って、データを取得する
-
-import React from "react";
+import * as React from "react";
 import { Anime } from "./danimeClient";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Collapse, Box, Button, Container } from "@mui/material";
+import { Box, Button } from "@mui/material";
 
-import { tableCellClasses } from "@mui/material/TableCell";
+import { DataGrid, GridToolbar, GridColDef, GridValueGetterParams, GridCellParams, GridRenderCellParams } from "@mui/x-data-grid";
+
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 
@@ -19,26 +19,6 @@ export interface AnimeTableProps {
   onRemove: (id: number) => void;
 }
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-}));
-
 // 指定したDate型から現在までの日数を計算する。ただし、１日未満の場合は時間を返す
 const calcDays = (date: Date) => {
   const now = new Date();
@@ -51,96 +31,79 @@ const calcDays = (date: Date) => {
   return `${days}日前`;
 };
 
-function Row(props: { row: Anime; editMode: boolean; onRemove: () => void }) {
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
+const columns: GridColDef[] = [
+  { field: "title", headerName: "作品名", width: 400 },
+  {
+    field: "allWatched",
+    headerName: "視聴ステータス",
+    width: 160,
+    valueGetter: (params: GridValueGetterParams) => (params.row.allWatched ? "すべて視聴済み" : `未視聴あり (${params.row.unWatchedCount}本)`),
+  },
+  {
+    field: "updated_at",
+    headerName: "最終更新",
+    width: 100,
+    valueGetter: (params: GridValueGetterParams) => calcDays(new Date(params.row.updated_at)),
+  },
+  { field: "seasonTag", headerName: "放送時期", width: 100 },
+  {
+    field: "latestUnwatchedEpisodeUrl",
+    headerName: "リンク",
+    width: 100,
+    renderCell: (params: GridRenderCellParams) => (
+      <Button variant="contained" target="_blank" href={params.row.latestUnwatchedEpisodeUrl}>
+        開く
+      </Button>
+    ),
+  },
+];
 
-  return (
-    <React.Fragment>
-      <StyledTableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <StyledTableCell>
-          {props.editMode ? (
-            <IconButton aria-label="delete" onClick={props.onRemove}>
-              <RemoveCircle />
-            </IconButton>
-          ) : (
-            <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-              {open ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
-            </IconButton>
-          )}
-        </StyledTableCell>
-        <StyledTableCell component="th" scope="row">
-          {row.title}
-        </StyledTableCell>
-        <StyledTableCell>{row.allWatched ? "すべて視聴済み" : `未視聴あり (${row.unWatchedCount}本)`}</StyledTableCell>
-        <StyledTableCell>{calcDays(new Date(row.updated_at))}</StyledTableCell>
-        <StyledTableCell>{row.seasonTag}</StyledTableCell>
-        <StyledTableCell>
-          <Button variant="contained" href={row.latestUnwatchedEpisodeUrl}>
-            開く
-          </Button>
-        </StyledTableCell>
-      </StyledTableRow>
-      <StyledTableRow>
-        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Table size="small" aria-label="episodes">
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell width={40}>話数</StyledTableCell>
-                    <StyledTableCell>タイトル</StyledTableCell>
-                    <StyledTableCell width={100}>視聴ステータス</StyledTableCell>
-                    <StyledTableCell width={100}>最終更新</StyledTableCell>
-                    <StyledTableCell width={100}>リンク</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.episodes.map((episode) => (
-                    <TableRow key={episode.id}>
-                      <StyledTableCell>{episode.episodeNumber}</StyledTableCell>
-                      <StyledTableCell>{episode.title}</StyledTableCell>
-                      <StyledTableCell>{episode.watched ? "視聴済み" : "未視聴"}</StyledTableCell>
-                      <StyledTableCell>{calcDays(new Date(episode.created_at))}</StyledTableCell>
-                      <StyledTableCell component="th" scope="row">
-                        <Button variant="contained" href={episode.url}>
-                          開く
-                        </Button>
-                      </StyledTableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </StyledTableCell>
-      </StyledTableRow>
-    </React.Fragment>
-  );
-}
+const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
+  "& .MuiDataGrid-toolbarContainer": {
+    backgroundColor: theme.palette.background.paper,
+  },
+  ".MuiDataGrid-columnHeaderTitle": {
+    color: theme.palette.text.secondary,
+  },
+  "& .MuiDataGrid-main": {
+    backgroundColor: theme.palette.background.paper,
+  },
+  "& .MuiDataGrid-footerContainer": {
+    backgroundColor: theme.palette.background.paper,
+  },
+  "& .MuiDataGrid-row:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
 
 export const AnimeTable = (props: AnimeTableProps) => {
   const { items, onRemove, editMode } = props;
 
+  const cellClickHandler = (event: GridCellParams) => {
+    console.log(event);
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label="collapsible table" size="small">
-        <TableHead>
-          <StyledTableRow>
-            <StyledTableCell width={30} />
-            <StyledTableCell>作品名</StyledTableCell>
-            <StyledTableCell width={160}>視聴ステータス</StyledTableCell>
-            <StyledTableCell width={100}>最終更新</StyledTableCell>
-            <StyledTableCell width={100}>放送時期</StyledTableCell>
-            <StyledTableCell width={100}>リンク</StyledTableCell>
-          </StyledTableRow>
-        </TableHead>
-        <TableBody>
-          {items.map((row) => (
-            <Row key={row.id} row={row} editMode={editMode} onRemove={() => onRemove(row.id)} />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Box sx={{ width: "100%" }}>
+      {/* <Box sx={{ height: 600, width: "100%" }}> */}
+      <StyledDataGrid
+        rows={items}
+        columns={columns}
+        disableRowSelectionOnClick
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
+        density="compact"
+        disableDensitySelector
+        onCellClick={(event) => cellClickHandler(event)}
+        autoHeight
+        sx={{
+          opacity: 0.9,
+        }}
+      />
+    </Box>
   );
 };
