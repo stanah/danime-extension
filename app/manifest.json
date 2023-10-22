@@ -5,6 +5,12 @@
   "version": "0.0.0",
   "manifest_version": 2,
   "default_locale": "en",
+  "applications": {
+    "gecko": {
+      "id": "danime_extension@stanah"
+    }
+  },
+
   "icons": {
     "16": "images/icon-16.png",
     "128": "images/icon-128.png"
@@ -23,6 +29,7 @@
   "content_scripts": [
     {
       "matches": ["https://animestore.docomo.ne.jp/animestore/**"],
+      "exclude_matches": ["https://animestore.docomo.ne.jp/animestore/sc_d_pc?**"],
       "js": ["scripts/content.js"],
       "run_at": "document_end"
     }
