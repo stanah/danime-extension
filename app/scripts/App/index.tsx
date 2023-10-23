@@ -101,6 +101,9 @@ export const App = ({ eventEmitter }: AppProps) => {
               <IconButton style={{ margin: "15px" }} onClick={forceUpdateAnimeData}>
                 <RefreshIcon />
               </IconButton>
+              <Typography fontWeight={"bold"} marginLeft={10} fontSize={20} color={"white"}>
+                d-anime WatchList Extension
+              </Typography>
             </Grid>
             <AnimeTable
               tableHeight={height - 200}
