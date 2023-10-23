@@ -15,6 +15,8 @@ export interface Anime {
   allWatched: boolean;
   unWatchedCount: number;
   latestUnwatchedEpisodeUrl: string;
+  // completed: boolean;
+  // isRental: boolean;
 }
 
 export interface Episode {

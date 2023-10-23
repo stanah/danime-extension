@@ -31,7 +31,6 @@ export type WatchListAddEvent = {
 export const App = ({ eventEmitter }: AppProps) => {
   const [items, setItems] = useState<AnimeWithRate[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
-  const [editMode, setEditMode] = useState<boolean>(false);
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -102,19 +101,10 @@ export const App = ({ eventEmitter }: AppProps) => {
               <IconButton style={{ margin: "15px" }} onClick={forceUpdateAnimeData}>
                 <RefreshIcon />
               </IconButton>
-              <IconButton style={{ margin: "15px" }} onClick={() => setEditMode(!editMode)}>
-                <EditIcon />
-              </IconButton>
-              {editMode ? (
-                <Typography color={"white"} variant="h6">
-                  編集中
-                </Typography>
-              ) : null}
             </Grid>
             <AnimeTable
               tableHeight={height - 200}
               items={items}
-              editMode={editMode}
               onRemove={async (d) => {
                 await removeFromWatchList(d);
                 const list = await getWatchListFromStorage();

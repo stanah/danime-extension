@@ -11,21 +11,16 @@ import { styled } from "@mui/material/styles";
 //Reactコンポーネントの型定義
 export interface AnimeTableProps {
   items: Anime[];
-  editMode: boolean;
   onRemove: (id: number) => void;
   onRateChange: (id: number, rate: number | null) => void;
   tableHeight: number;
 }
 
-// 指定したDate型から現在までの日数を計算する。ただし、１日未満の場合は時間を返す
+// 指定したDate型から現在までの日数を計算する
 const calcDays = (date: Date) => {
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days < 1) {
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    return `${hours}時間前`;
-  }
   return `${days}日前`;
 };
 
@@ -48,7 +43,7 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 }));
 
 export const AnimeTable = (props: AnimeTableProps) => {
-  const { items, onRemove, onRateChange, editMode, tableHeight } = props;
+  const { items, onRemove, onRateChange, tableHeight } = props;
 
   const cellClickHandler = (event: GridCellParams) => {
     console.log(event);
@@ -58,7 +53,7 @@ export const AnimeTable = (props: AnimeTableProps) => {
     { field: "title", headerName: "作品名", width: 400 },
     {
       field: "rate",
-      headerName: "評価",
+      headerName: "優先度",
       width: 150,
       renderCell: (params: GridRenderCellParams) => (
         <Rating
@@ -80,6 +75,12 @@ export const AnimeTable = (props: AnimeTableProps) => {
       field: "updated_at",
       headerName: "最終更新",
       width: 100,
+      sortComparator: (v1, v2, param1, param2) => {
+        // 日数が文字列なので数値部分だけ取得する
+        const v1num = parseInt(v1.split("日")[0]);
+        const v2num = parseInt(v2.split("日")[0]);
+        return v1num > v2num ? 1 : -1;
+      },
       valueGetter: (params: GridValueGetterParams) => calcDays(new Date(params.row.updated_at)),
     },
     { field: "seasonTag", headerName: "放送時期", width: 100 },
@@ -92,6 +93,7 @@ export const AnimeTable = (props: AnimeTableProps) => {
           開く
         </Button>
       ),
+      sortable: false,
     },
     {
       field: "remove",
@@ -102,6 +104,7 @@ export const AnimeTable = (props: AnimeTableProps) => {
           削除
         </Button>
       ),
+      sortable: false,
     },
   ];
 
