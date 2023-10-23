@@ -1,9 +1,7 @@
 import { getAnimeData, Anime, AnimeId } from "./danimeClient";
 
-export type Rate = 1 | 2 | 3 | 4 | 5;
-
 export interface AnimeWithRate extends Anime {
-  rate: Rate | null;
+  rate: number | null;
 }
 
 const reservedKeys = ["watchLists"];
@@ -28,7 +26,7 @@ export class AnimeStorageClient {
     return ret;
   }
 
-  async setRate(id: AnimeId, rate: Rate): Promise<void> {
+  async setRate(id: AnimeId, rate: number): Promise<void> {
     const animeInfo = await this.getAnimeInfo(id);
     animeInfo.rate = rate;
     await setAnime(id, animeInfo);
@@ -194,6 +192,12 @@ export class WatchList {
   }
   getList(): AnimeWithRate[] {
     return this.list;
+  }
+
+  async updateRate(id: AnimeId, rate: number | null): Promise<void> {
+    const animeInfo = await animeStorageClient.getAnimeInfo(id);
+    animeInfo.rate = rate;
+    await setAnime(id, animeInfo);
   }
 
   async save(): Promise<void> {

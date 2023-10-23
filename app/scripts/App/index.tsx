@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   IconButton,
@@ -203,6 +203,11 @@ export const App = ({ eventEmitter }: AppProps) => {
               onRemove={async (d) => {
                 if (!watchList) return;
                 await watchList.remove(d);
+                setItems(watchList.getList());
+              }}
+              onRateChange={async (id: number, rate: number | null) => {
+                if (!watchList) return;
+                await watchList.updateRate(id, rate);
                 setItems(watchList.getList());
               }}
             />
