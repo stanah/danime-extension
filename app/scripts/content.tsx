@@ -2,7 +2,7 @@ import ReactDOM from "react-dom/client";
 import { EventEmitter } from "events";
 
 import App from "./App";
-import { getWatchList, getSelectedWatchListName } from "./App/storageClient";
+import { addToWatchList } from "./App/storageClient";
 
 const eventEmitter = new EventEmitter();
 
@@ -25,10 +25,8 @@ window.addEventListener("load", () => {
       buttonElement.textContent = "ウォッチリストに追加";
       buttonElement.style.zIndex = "9999";
       buttonElement.onclick = async () => {
-        const selectedWatchList = await getSelectedWatchListName();
-        const watchList = await getWatchList(selectedWatchList);
         try {
-          await watchList.add(Number(workId));
+          await addToWatchList(Number(workId));
           eventEmitter.emit("watchListUpdated", { error: false, notify: true, message: "ウォッチリストに追加しました" });
         } catch (e) {
           eventEmitter.emit("watchListUpdated", { error: true, notify: true, message: "既に登録されています" });

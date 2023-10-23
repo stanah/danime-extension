@@ -19,18 +19,9 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import EditIcon from "@mui/icons-material/Edit";
 
-import {
-  getWatchList,
-  AnimeWithRate,
-  getWatchLists,
-  removeWatchList,
-  WatchList,
-  saveWatchList,
-  setSelectedWatchListName,
-  getSelectedWatchListName,
-} from "./storageClient";
+import { AnimeWithRate, getWatchListFromStorage, forceUpdateWatchList, updateRate, removeFromWatchList } from "./storageClient";
 import { AnimeTable } from "./animeTable";
-import { Menu } from "@mui/icons-material";
+import { Menu, Watch } from "@mui/icons-material";
 
 const theme = createTheme({
   palette: {
@@ -53,11 +44,8 @@ export type WatchListAddEvent = {
 
 export const App = ({ eventEmitter }: AppProps) => {
   const [items, setItems] = useState<AnimeWithRate[]>([]);
-  const [watchList, setWatchList] = useState<WatchList | null>(null);
-  const [watchLists, setWatchLists] = useState<string[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
-  const [selectedWatchList, setSelectedWatchList] = useState<string>("default");
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -65,10 +53,9 @@ export const App = ({ eventEmitter }: AppProps) => {
 
   const [height, setHeight] = useState<number>(window.innerHeight);
 
-  const updateAnimeData = async () => {
-    if (!watchList) return;
-    const newWatchList = await watchList.updateAll();
-    setWatchList(newWatchList);
+  const forceUpdateAnimeData = async () => {
+    const newWatchList = await forceUpdateWatchList();
+    setItems(newWatchList);
   };
 
   useEffect(() => {
@@ -81,32 +68,9 @@ export const App = ({ eventEmitter }: AppProps) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 選択されているwaTchListを削除する
-  const removeSelectedWatchList = async () => {
-    try {
-      await removeWatchList(selectedWatchList);
-    } catch (e) {
-      alert("削除に失敗しました");
-    }
-    const list = await getWatchLists();
-    setWatchLists(list);
-    setSelectedWatchList("default");
-  };
-
-  const onClickAddWatchList = async () => {
-    const name = prompt("ウォッチリストの名前を入力してください");
-    if (name) {
-      await saveWatchList(new WatchList(name, []));
-      const list = await getWatchLists();
-      setWatchLists(list);
-      setSelectedWatchList(name);
-    }
-  };
-
   const handleWatchListUpdated = async (d: WatchListAddEvent) => {
-    const current = await getSelectedWatchListName();
-    const newWatchList = await getWatchList(current);
-    setWatchList(newWatchList);
+    const list = await getWatchListFromStorage();
+    setItems(list);
     if (d.notify) {
       setMessage(d.message);
       setSeverity(d.error ? "error" : "success");
@@ -115,23 +79,11 @@ export const App = ({ eventEmitter }: AppProps) => {
   };
 
   useEffect(() => {
-    (async () => {
-      const newWatchList = await getWatchList(selectedWatchList);
-      setWatchList(newWatchList);
-      await setSelectedWatchListName(selectedWatchList);
-    })();
-  }, [selectedWatchList]);
-
-  useEffect(() => {
-    if (!watchList) return;
-    setItems(watchList.getList());
-  }, [watchList]);
-
-  useEffect(() => {
-    (async () => {
-      const list = await getWatchLists();
-      setWatchLists(list);
-    })();
+    const init = async () => {
+      const list = await getWatchListFromStorage();
+      setItems(list);
+    };
+    init();
     eventEmitter.on("watchListUpdated", handleWatchListUpdated);
     return () => {
       eventEmitter.off("watchListUpdated", handleWatchListUpdated);
@@ -161,7 +113,7 @@ export const App = ({ eventEmitter }: AppProps) => {
               <IconButton style={{ margin: "15px" }} onClick={() => setVisible(!visible)}>
                 <Menu />
               </IconButton>
-              <IconButton style={{ margin: "15px" }} onClick={updateAnimeData}>
+              <IconButton style={{ margin: "15px" }} onClick={forceUpdateAnimeData}>
                 <RefreshIcon />
               </IconButton>
               <IconButton style={{ margin: "15px" }} onClick={() => setEditMode(!editMode)}>
@@ -172,43 +124,22 @@ export const App = ({ eventEmitter }: AppProps) => {
                   編集中
                 </Typography>
               ) : null}
-              <FormControl style={{ marginLeft: "20px", marginRight: "20px", width: "200px" }}>
-                <InputLabel>ウォッチリスト</InputLabel>
-                <Select
-                  value={selectedWatchList}
-                  label="ウォッチリスト"
-                  onChange={async (e) => {
-                    setSelectedWatchList(e.target.value as string);
-                  }}
-                >
-                  {watchLists.map((d) => (
-                    <MenuItem key={d} value={d}>
-                      {d}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {editMode ? (
-                <Button color="secondary" onClick={() => removeSelectedWatchList()}>
-                  ウォッチリストを削除
-                </Button>
-              ) : (
-                <Button onClick={() => onClickAddWatchList()}>追加</Button>
-              )}
             </Grid>
             <AnimeTable
               tableHeight={height - 200}
               items={items}
               editMode={editMode}
               onRemove={async (d) => {
-                if (!watchList) return;
-                await watchList.remove(d);
-                setItems(watchList.getList());
+                await removeFromWatchList(d);
+                const list = await getWatchListFromStorage();
+                setItems(list);
               }}
               onRateChange={async (id: number, rate: number | null) => {
-                if (!watchList) return;
-                await watchList.updateRate(id, rate);
-                setItems(watchList.getList());
+                console.log("onRateChange");
+                if (rate == null) updateRate(id, 0);
+                else updateRate(id, rate);
+                const list = await getWatchListFromStorage();
+                setItems(list);
               }}
             />
           </Box>
