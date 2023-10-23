@@ -118,6 +118,8 @@ export const AnimeTable = (props: AnimeTableProps) => {
         slotProps={{
           toolbar: {
             showQuickFilter: true,
+            printOptions: { disableToolbarButton: true },
+            csvOptions: { disableToolbarButton: true },
           },
         }}
         density="compact"
