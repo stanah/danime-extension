@@ -82,8 +82,16 @@ const setAnime = async (animeId: AnimeId, value: AnimeWithRate): Promise<void> =
   return set(`${animeIdPrefix}${animeId}`, value);
 };
 
-const getAnimeIds = async (): Promise<AnimeId[]> => {
-  return get(WATCH_LIST_NAME);
+// WatchListの重複を削除して保存する
+export const setWatchList = async (): Promise<void> => {
+  const list = (await get(WATCH_LIST_NAME)) || [];
+  const newList = Array.from(new Set(list));
+  await set(WATCH_LIST_NAME, newList);
+};
+
+export const getAnimeIds = async (): Promise<AnimeId[]> => {
+  const list: AnimeId[] = await get(WATCH_LIST_NAME);
+  return list;
 };
 
 export const addToWatchList = async (animeId: AnimeId): Promise<void> => {

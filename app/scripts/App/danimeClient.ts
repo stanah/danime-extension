@@ -19,7 +19,7 @@ export interface Anime {
 
 export interface Episode {
   id: string;
-  episodeNumber: number;
+  episodeNumber: string;
   title: string;
   url: string;
   watched: boolean;
@@ -27,10 +27,10 @@ export interface Episode {
 }
 
 // 文字列から数値を抽出する
-const extractNumberFromString = (str: string): number => {
+const extractNumberFromString = (str: string): string => {
   const number = str.match(/\d+/);
-  if (number === null) throw new Error("Invalid number format");
-  return Number(number[0]);
+  if (number === null) return str;
+  return number[0];
 };
 
 const getAnimeData = async (id: AnimeId): Promise<Anime> => {
@@ -45,9 +45,11 @@ const getAnimeData = async (id: AnimeId): Promise<Anime> => {
     const imgSrc = element.querySelector("div.thumbnailContainer img")?.getAttribute("data-src") || "";
     const createdAt = imgSrc.slice(-13);
     const partId = element.getAttribute("href")?.replace("cd_pc?partId=", "");
+
+    const episodeNumberString = element.querySelector("div.textContainer span.line1 span.number")?.innerHTML ?? "";
     episodeList.push({
       id: element.id,
-      episodeNumber: extractNumberFromString(element.querySelector("div.textContainer span.line1 span.number")?.innerHTML ?? ""),
+      episodeNumber: extractNumberFromString(episodeNumberString) || episodeNumberString,
       title: element.querySelector("div.textContainer h3.line2 span")?.innerHTML ?? "",
       url: `https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId=${partId}`,
       watched: element.classList.contains("watched"),

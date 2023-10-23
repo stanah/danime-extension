@@ -1,27 +1,13 @@
 import { EventEmitter } from "events";
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  IconButton,
-  Typography,
-  Grid,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Snackbar,
-  Alert,
-  Modal,
-  Box,
-  Backdrop,
-} from "@mui/material";
+import { IconButton, Typography, Grid, Snackbar, Alert, Modal, Box, Backdrop } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import EditIcon from "@mui/icons-material/Edit";
 
-import { AnimeWithRate, getWatchListFromStorage, forceUpdateWatchList, updateRate, removeFromWatchList } from "./storageClient";
+import { AnimeWithRate, getWatchListFromStorage, forceUpdateWatchList, updateRate, removeFromWatchList, setWatchList } from "./storageClient";
 import { AnimeTable } from "./animeTable";
-import { Menu, Watch } from "@mui/icons-material";
+import { Menu } from "@mui/icons-material";
 
 const theme = createTheme({
   palette: {
@@ -61,7 +47,6 @@ export const App = ({ eventEmitter }: AppProps) => {
   useEffect(() => {
     const handleResize = () => {
       setHeight(window.innerHeight);
-      console.log(window.innerHeight);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -80,6 +65,7 @@ export const App = ({ eventEmitter }: AppProps) => {
 
   useEffect(() => {
     const init = async () => {
+      await setWatchList();
       const list = await getWatchListFromStorage();
       setItems(list);
     };
@@ -135,7 +121,6 @@ export const App = ({ eventEmitter }: AppProps) => {
                 setItems(list);
               }}
               onRateChange={async (id: number, rate: number | null) => {
-                console.log("onRateChange");
                 if (rate == null) updateRate(id, 0);
                 else updateRate(id, rate);
                 const list = await getWatchListFromStorage();
