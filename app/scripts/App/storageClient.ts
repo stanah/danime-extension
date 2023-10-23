@@ -134,3 +134,8 @@ export const updateRate = async (animeId: AnimeId, rate: number): Promise<AnimeW
   await animeStorageClient.setRate(animeId, rate);
   return getWatchListFromStorage();
 };
+
+export const existsInWatchList = async (animeId: AnimeId): Promise<boolean> => {
+  const list = (await getAnimeIds()) || [];
+  return list.includes(animeId);
+};

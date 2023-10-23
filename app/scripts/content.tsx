@@ -2,7 +2,7 @@ import ReactDOM from "react-dom/client";
 import { EventEmitter } from "events";
 
 import App from "./App";
-import { addToWatchList } from "./App/storageClient";
+import { addToWatchList, existsInWatchList } from "./App/storageClient";
 
 const eventEmitter = new EventEmitter();
 
@@ -17,13 +17,19 @@ const root = ReactDOM.createRoot(div);
 
 root.render(<App eventEmitter={eventEmitter} />);
 
-window.addEventListener("load", () => {
-  document.querySelectorAll("div.itemModule").forEach((d) => {
-    const workId = d.getAttribute("data-workid");
-    if (workId && Number(workId) > 0) {
-      const buttonElement = document.createElement("button");
+const setButton = async (d: Element) => {
+  const workId = d.getAttribute("data-workid");
+  if (workId && Number(workId) > 0) {
+    const buttonElement = document.createElement("button");
+    buttonElement.style.zIndex = "9999";
+
+    // ウォッチリストに既に追加されているかどうかを判定する
+    if (await existsInWatchList(Number(workId))) {
+      buttonElement.textContent = "📌";
+      buttonElement.disabled = true;
+    } else {
       buttonElement.textContent = "ウォッチリストに追加";
-      buttonElement.style.zIndex = "9999";
+      buttonElement.style.cursor = "pointer";
       buttonElement.onclick = async () => {
         try {
           await addToWatchList(Number(workId));
@@ -31,17 +37,24 @@ window.addEventListener("load", () => {
         } catch (e) {
           eventEmitter.emit("watchListUpdated", { error: true, notify: true, message: "既に登録されています" });
         }
+        buttonElement.textContent = "📌";
+        buttonElement.disabled = true;
+        buttonElement.style.cursor = "default";
       };
-
-      const div = document.createElement("div");
-      div.appendChild(buttonElement);
-
-      // すでに追加されたボタンを削除する
-      const existingButton = d.querySelector("div > button");
-      if (existingButton) {
-        existingButton.remove();
-      }
-      d.appendChild(div);
     }
-  });
+
+    const div = document.createElement("div");
+    div.appendChild(buttonElement);
+
+    // すでに追加されたボタンを削除する
+    const existingButton = d.querySelector("div > button");
+    if (existingButton) {
+      existingButton.remove();
+    }
+    d.appendChild(div);
+  }
+};
+
+window.addEventListener("load", () => {
+  document.querySelectorAll("div.itemModule").forEach((d) => setButton(d));
 });
