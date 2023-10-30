@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=";
+export const BASE_URL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=";
 
 export type AnimeId = number;
 // export type AnimeId = string;
@@ -25,6 +25,7 @@ export interface Episode {
   title: string;
   url: string;
   watched: boolean;
+  progress: string;
   created_at: number;
 }
 
@@ -48,13 +49,18 @@ const getAnimeData = async (id: AnimeId): Promise<Anime> => {
     const createdAt = imgSrc.slice(-13);
     const partId = element.getAttribute("href")?.replace("cd_pc?partId=", "");
 
+    const progress = element.querySelector("div.progress span.progressBar span.progressCompleted")?.getAttribute("style") || "";
+    const progressNumber = Number(progress.match(/\d+/)?.[0] ?? 0);
+
     const episodeNumberString = element.querySelector("div.textContainer span.line1 span.number")?.innerHTML ?? "";
     episodeList.push({
       id: element.id,
       episodeNumber: extractNumberFromString(episodeNumberString) || episodeNumberString,
       title: element.querySelector("div.textContainer h3.line2 span")?.innerHTML ?? "",
-      url: `https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId=${partId}`,
-      watched: element.classList.contains("watched"),
+      url: `https://animestore.docomo.ne.jp/animestore/ci_pc?workId=${id}&partId=${partId}`,
+      // url: `https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId=${partId}`,
+      watched: progressNumber > 90,
+      progress,
       created_at: new Date(Number(createdAt)).getTime(),
     });
   });
