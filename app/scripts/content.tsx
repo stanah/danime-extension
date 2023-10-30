@@ -17,8 +17,7 @@ const root = ReactDOM.createRoot(div);
 
 root.render(<App eventEmitter={eventEmitter} />);
 
-const setButton = async (d: Element) => {
-  const workId = d.getAttribute("data-workid");
+const setButton = async (workId: string | null, element: Element) => {
   if (workId && Number(workId) > 0) {
     const buttonElement = document.createElement("button");
     buttonElement.style.zIndex = "9999";
@@ -47,14 +46,46 @@ const setButton = async (d: Element) => {
     div.appendChild(buttonElement);
 
     // すでに追加されたボタンを削除する
-    const existingButton = d.querySelector("div > button");
+    const existingButton = element.querySelector("div > button");
     if (existingButton) {
       existingButton.remove();
     }
-    d.appendChild(div);
+    element.appendChild(div);
+    return div;
+  }
+  return null;
+};
+
+const setButtonToItemModule = async (element: Element) => {
+  const workId = element.getAttribute("data-workid");
+  setButton(workId, element);
+};
+
+const setButtonToPslider = (element: Element) => {
+  // hrefからworkIdを取得する
+  const href = element.firstElementChild?.getAttribute("href");
+  const workId = href?.split("workId=")[1] || null;
+  setButton(workId, element);
+};
+
+const replaceMyListButton = async (element: Element) => {
+  const workId = element.getAttribute("data-workid");
+
+  // elementの親要素を取得する
+  const parent = element.parentElement;
+  if (parent) {
+    const btn = await setButton(workId, parent);
+    if (btn == null) return;
+    btn.style.margin = "0";
+    btn.style.height = "44px";
+    element.remove();
   }
 };
 
 window.addEventListener("load", () => {
-  document.querySelectorAll("div.itemModule").forEach((d) => setButton(d));
+  setTimeout(() => {
+    document.querySelectorAll("div.itemModule").forEach((d) => setButtonToItemModule(d));
+    document.querySelectorAll("div.p-slider__item").forEach((d) => setButtonToPslider(d));
+    document.querySelectorAll("div.btnAddMyList").forEach((d) => replaceMyListButton(d));
+  }, 1000);
 });
