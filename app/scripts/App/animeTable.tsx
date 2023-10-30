@@ -1,8 +1,8 @@
 // material-uiのテーブルを使って、データを表示するReactコンポーネントを作成する
 // useEffectで、画面読み込み時にgetAnimeData()を使って、データを取得する
 import React from "react";
-import { Anime } from "./danimeClient";
-import { Box, Button, Rating } from "@mui/material";
+import { Anime, BASE_URL } from "./danimeClient";
+import { Box, Button, Link, Rating } from "@mui/material";
 
 import { DataGrid, GridToolbar, GridColDef, GridValueGetterParams, GridCellParams, GridRenderCellParams } from "@mui/x-data-grid";
 
@@ -42,15 +42,34 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   },
 }));
 
+// リンクの色を変更する
+const StyledLink = styled(Link)(({ theme }) => ({
+  color: theme.palette.text.primary,
+  "&:link": {
+    color: theme.palette.text.primary,
+  },
+  "&:visited": {
+    color: theme.palette.text.primary,
+  },
+}));
+
 export const AnimeTable = (props: AnimeTableProps) => {
   const { items, onRemove, onRateChange, tableHeight } = props;
 
   const cellClickHandler = (event: GridCellParams) => {
     console.log(event);
   };
-
   const columns: GridColDef[] = [
-    { field: "title", headerName: "作品名", width: 400 },
+    {
+      field: "title",
+      headerName: "作品名",
+      width: 400,
+      renderCell: (params: GridRenderCellParams) => (
+        <StyledLink href={`${BASE_URL}${params.row.id}`} target="_blank">
+          {params.row.title}
+        </StyledLink>
+      ),
+    },
     {
       field: "rate",
       headerName: "優先度",
@@ -69,7 +88,11 @@ export const AnimeTable = (props: AnimeTableProps) => {
       field: "allWatched",
       headerName: "視聴ステータス",
       width: 160,
-      valueGetter: (params: GridValueGetterParams) => (params.row.allWatched ? "すべて視聴済み" : `未視聴あり (${params.row.unWatchedCount}本)`),
+      renderCell: (params: GridRenderCellParams) => (
+        <StyledLink href={params.row.latestUnwatchedEpisodeUrl} target="_blank">
+          {params.row.allWatched ? "すべて視聴済み" : `未視聴あり (${params.row.unWatchedCount}本)`}
+        </StyledLink>
+      ),
     },
     {
       field: "updated_at",
