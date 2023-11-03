@@ -34,20 +34,5 @@
       "run_at": "document_end"
     }
   ],
-  "permissions": [
-    "activeTab",
-    "browsingData",
-    "cookies",
-    "notifications",
-    "privacy",
-    "proxy",
-    "sessions",
-    "storage",
-    "webNavigation",
-    "webRequest",
-    "webRequestBlocking",
-    "contextMenus",
-    "tabs",
-    "<all_urls>"
-  ]
+  "permissions": ["notifications", "storage", "<all_urls>"]
 }
