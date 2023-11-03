@@ -108,17 +108,6 @@ export const AnimeTable = (props: AnimeTableProps) => {
     },
     { field: "seasonTag", headerName: "放送時期", width: 100 },
     {
-      field: "latestUnwatchedEpisodeUrl",
-      headerName: "リンク",
-      width: 100,
-      renderCell: (params: GridRenderCellParams) => (
-        <Button variant="contained" target="_blank" href={params.row.latestUnwatchedEpisodeUrl}>
-          開く
-        </Button>
-      ),
-      sortable: false,
-    },
-    {
       field: "remove",
       headerName: "削除",
       width: 100,
