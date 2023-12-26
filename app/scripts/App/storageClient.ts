@@ -51,11 +51,11 @@ const animeStorageClient = new AnimeStorageClient();
 
 const get = async (key: string): Promise<any> => {
   if (typeof browser !== "undefined") {
-    const ret = await browser.storage.sync.get(key);
+    const ret = await browser.storage.local.get(key);
     return ret[key];
   } else if (typeof chrome !== "undefined") {
     return new Promise((resolve, reject) => {
-      chrome.storage.sync.get(key, function (value) {
+      chrome.storage.local.get(key, function (value) {
         resolve(value[key]);
       });
     });
@@ -66,9 +66,9 @@ const get = async (key: string): Promise<any> => {
 
 const set = async (key: string, value: any): Promise<void> => {
   if (typeof browser !== "undefined") {
-    return browser.storage.sync.set({ [key]: value });
+    return browser.storage.local.set({ [key]: value });
   } else if (typeof chrome !== "undefined") {
-    await chrome.storage.sync.set({ [key]: value });
+    await chrome.storage.local.set({ [key]: value });
   } else {
     throw new Error("Unsupported browser");
   }
