@@ -2,8 +2,8 @@
 // useEffectで、画面読み込み時にgetAnimeData()を使って、データを取得する
 import React from "react";
 import { Anime, BASE_URL } from "./danimeClient";
-import { Box, Button, Link, Rating } from "@mui/material";
-
+import { Box, IconButton, Link, Rating } from "@mui/material";
+import { Delete } from "@mui/icons-material";
 import { DataGrid, GridToolbar, GridColDef, GridValueGetterParams, GridCellParams, GridRenderCellParams } from "@mui/x-data-grid";
 
 import { styled } from "@mui/material/styles";
@@ -51,6 +51,9 @@ const StyledLink = styled(Link)(({ theme }) => ({
   "&:visited": {
     color: theme.palette.text.primary,
   },
+  "&:hover": {
+    backgroundColor: theme.palette.text.primary,
+  },
 }));
 
 export const AnimeTable = (props: AnimeTableProps) => {
@@ -79,7 +82,7 @@ export const AnimeTable = (props: AnimeTableProps) => {
     },
     {
       field: "rate",
-      headerName: "優先度",
+      headerName: "評価",
       width: 150,
       renderCell: (params: GridRenderCellParams) => (
         <Rating
@@ -116,12 +119,12 @@ export const AnimeTable = (props: AnimeTableProps) => {
     { field: "seasonTag", headerName: "放送時期", width: 100 },
     {
       field: "remove",
-      headerName: "削除",
+      headerName: "",
       width: 100,
       renderCell: (params: GridRenderCellParams) => (
-        <Button variant="contained" color="error" onClick={() => onRemove(params.row.id)}>
-          削除
-        </Button>
+        <IconButton color="error" onClick={() => onRemove(params.row.id)}>
+          <Delete />
+        </IconButton>
       ),
       sortable: false,
     },
