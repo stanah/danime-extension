@@ -59,6 +59,13 @@ export const AnimeTable = (props: AnimeTableProps) => {
   const cellClickHandler = (event: GridCellParams) => {
     console.log(event);
   };
+
+  const getWatchStatus = (row: any) => {
+    if (row.allWatched) return "✅";
+    if (row.unWatchedCount !== row.episodes.length) return `📖 ${row.episodes.length - row.unWatchedCount} / ${row.episodes.length}`;
+    return `📕 ${row.episodes.length - row.unWatchedCount} / ${row.episodes.length}`;
+  };
+
   const columns: GridColDef[] = [
     {
       field: "title",
@@ -90,7 +97,7 @@ export const AnimeTable = (props: AnimeTableProps) => {
       width: 160,
       renderCell: (params: GridRenderCellParams) => (
         <StyledLink href={params.row.latestUnwatchedEpisodeUrl} target="_blank">
-          {params.row.allWatched ? "すべて視聴済み" : `未視聴あり (${params.row.unWatchedCount}本)`}
+          {getWatchStatus(params.row)}
         </StyledLink>
       ),
     },
