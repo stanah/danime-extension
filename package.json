@@ -1,10 +1,11 @@
 {
   "name": "danime-extension",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   "scripts": {
     "dev": "NODE_OPTIONS='--openssl-legacy-provider' webextension-toolbox dev",
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' webextension-toolbox build"
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' webextension-toolbox build",
+    "version": "node scripts/update-manifest.js && prettier --write app/manifest.json && git add app/manifest.json"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.22.15",
