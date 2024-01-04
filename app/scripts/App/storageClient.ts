@@ -38,6 +38,9 @@ export class AnimeStorageClient {
 
   async updateAnimeInfo(id: AnimeId): Promise<AnimeWithRate> {
     const ret = await getAnime(id);
+    if (ret?.allWatched === true && ret.title.match(/（全\d+話）/)) {
+      return ret;
+    }
     const data = await getAnimeData(id);
     const animeWithRate: AnimeWithRate = {
       ...data,
