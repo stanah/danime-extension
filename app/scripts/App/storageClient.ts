@@ -37,10 +37,11 @@ export class AnimeStorageClient {
   }
 
   async updateAnimeInfo(id: AnimeId): Promise<AnimeWithRate> {
+    const ret = await getAnime(id);
     const data = await getAnimeData(id);
     const animeWithRate: AnimeWithRate = {
       ...data,
-      rate: null,
+      rate: ret.rate || null,
     };
     await setAnime(id, animeWithRate);
     return animeWithRate;
