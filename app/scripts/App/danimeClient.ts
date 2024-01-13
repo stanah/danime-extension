@@ -68,7 +68,7 @@ const getAnimeData = async (id: AnimeId): Promise<Anime> => {
   const title = dom.querySelector("div.titleWrap h1")?.innerHTML.replace(/<("[^"]*"|'[^']*'|[^'">])*>/g, "") ?? "";
 
   // episodeListの最後の要素が最新話なので、そのcreated_atを取得する
-  const latestEpisodeCreatedAt = episodeList[episodeList.length - 1].created_at;
+  const latestEpisodeCreatedAt = episodeList[episodeList.length - 1]?.created_at || 0;
 
   let seasonTag = "";
   dom.querySelectorAll("div.tagArea").forEach((element) => {
