@@ -3,7 +3,7 @@
 import React from "react";
 import { Anime, BASE_URL } from "./danimeClient";
 import { Box, IconButton, Link, Rating } from "@mui/material";
-import { Delete } from "@mui/icons-material";
+import { Delete, Refresh } from "@mui/icons-material";
 import { DataGrid, GridToolbar, GridColDef, GridValueGetterParams, GridCellParams, GridRenderCellParams } from "@mui/x-data-grid";
 
 import { styled } from "@mui/material/styles";
@@ -12,6 +12,7 @@ import { styled } from "@mui/material/styles";
 export interface AnimeTableProps {
   items: Anime[];
   onRemove: (id: number) => void;
+  onReflesh: (id: number) => void;
   onRateChange: (id: number, rate: number | null) => void;
   tableHeight: number;
 }
@@ -57,7 +58,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }));
 
 export const AnimeTable = (props: AnimeTableProps) => {
-  const { items, onRemove, onRateChange, tableHeight } = props;
+  const { items, onRemove, onReflesh, onRateChange, tableHeight } = props;
 
   const cellClickHandler = (event: GridCellParams) => {
     console.log(event);
@@ -122,9 +123,14 @@ export const AnimeTable = (props: AnimeTableProps) => {
       headerName: "",
       width: 100,
       renderCell: (params: GridRenderCellParams) => (
-        <IconButton color="error" onClick={() => onRemove(params.row.id)}>
-          <Delete />
-        </IconButton>
+        <>
+          <IconButton color="primary" onClick={() => onReflesh(params.row.id)}>
+            <Refresh />
+          </IconButton>
+          <IconButton color="secondary" onClick={() => onRemove(params.row.id)}>
+            <Delete />
+          </IconButton>
+        </>
       ),
       sortable: false,
     },

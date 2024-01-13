@@ -5,7 +5,15 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import EditIcon from "@mui/icons-material/Edit";
 
-import { AnimeWithRate, getWatchListFromStorage, forceUpdateWatchList, updateRate, removeFromWatchList, setWatchList } from "./storageClient";
+import {
+  AnimeWithRate,
+  getWatchListFromStorage,
+  forceUpdateWatchList,
+  updateRate,
+  removeFromWatchList,
+  setWatchList,
+  updateAnimeInfo,
+} from "./storageClient";
 import { AnimeTable } from "./animeTable";
 import { Menu } from "@mui/icons-material";
 
@@ -111,6 +119,10 @@ export const App = ({ eventEmitter }: AppProps) => {
               onRemove={async (d) => {
                 await removeFromWatchList(d);
                 const list = await getWatchListFromStorage();
+                setItems(list);
+              }}
+              onReflesh={async (d) => {
+                const list = await updateAnimeInfo(d);
                 setItems(list);
               }}
               onRateChange={async (id: number, rate: number | null) => {

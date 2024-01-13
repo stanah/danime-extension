@@ -11,7 +11,7 @@ export class AnimeStorageClient {
   async getAnimeInfo(id: AnimeId): Promise<AnimeWithRate> {
     const ret = await getAnime(id);
     if (ret === undefined) {
-      console.log("見つからないのでdanimeClientから取得する");
+      console.log("見つからないのでdanimeClientから取得する", id);
       const data = await getAnimeData(id);
       const animeWithRate: AnimeWithRate = {
         ...data,
@@ -20,7 +20,7 @@ export class AnimeStorageClient {
       await setAnime(id, animeWithRate);
       return animeWithRate;
     }
-    console.log("見つかったのでstorageから取得したものを返す");
+    console.log("見つかったのでstorageから取得したものを返す", id);
     return ret;
   }
 
@@ -132,6 +132,13 @@ export const forceUpdateWatchList = async (): Promise<AnimeWithRate[]> => {
     newAnimeList.push(animeInfo);
   }
   return newAnimeList;
+};
+
+// 指定したアニメ情報を更新し、それを含めたリストを返す
+export const updateAnimeInfo = async (animeId: AnimeId): Promise<AnimeWithRate[]> => {
+  await animeStorageClient.updateAnimeInfo(animeId);
+  const list = await getWatchListFromStorage();
+  return list;
 };
 
 export const updateRate = async (animeId: AnimeId, rate: number): Promise<AnimeWithRate[]> => {
